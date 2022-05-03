@@ -1,0 +1,35 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Chatting
+        link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+    body
+        header  
+            h1 Welcome to Chatting
+        main 
+            div#welcome
+                form#roomname
+                    input(type="text", placeholder="room name", required)
+                    button Enter Room
+                form#name
+                    input(type="text", placeholder="nickname", required)
+                    button Save 
+                h4 Open Rooms:
+                ul
+            div#room
+                h3
+                ul
+                div#image
+                form#msg
+                    input(type="file", placeholder="file", id="siofu_input", accepts="images/*", required)
+                    button Send
+                form#msg
+                    input(type="text", placeholder="message", required)
+                    button Send
+                
+        script(src="/socket.io/socket.io.js") 
+        script(src="/siofu/client.js")
+        script(src="/public/js/app.js")
