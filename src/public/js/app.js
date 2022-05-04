@@ -67,7 +67,9 @@ siofu.addEventListener("complete", function (event) {
   console.log(event);
   console.log(event.detail.nameOfImage);
   const img = document.createElement("img");
+  img.setAttribute("style", "float:left;width:500px;height:300px");
   const images = event.detail.nameOfImage;
+  console.log(images);
   img.src = images;
   imge.appendChild(img);
 });

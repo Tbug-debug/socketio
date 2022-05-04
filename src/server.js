@@ -3,15 +3,25 @@ import { Server } from "socket.io";
 import express from "express";
 import { instrument } from "@socket.io/admin-ui";
 import siofu from "socketio-file-upload";
+import fs from "fs";
 
 const app = express();
 
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 app.use(siofu.router);
-app.use(express.static(__dirname + "/uploads"));
+app.listen(80);
+app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req, res) => res.render("home"));
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/views/home.pug");
+});
+app.get("/deleteimage", (req, res) => {
+  console.log(req.query);
+  res.json(req.query.path);
+  fs.unlinkSync(__dirname + "/uploads/" + req.query.path, () => {});
+});
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
@@ -46,18 +56,25 @@ function countRoom(roomName) {
   return weServer.sockets.adapter.rooms.get(roomName)?.size;
 }
 
+weServer.sockets.on("connection", function (socket) {
+  const uploader = new siofu();
+  uploader.dir = "uploads";
+  uploader.listen(socket);
+  uploader.on("saved", (event) => {
+    event.file.clientDetail.nameOfImage = event.file.name;
+  });
+  uploader.on("error", (event) => {
+    console.log("Error from uploader", event);
+  });
+});
+
 weServer.on("connection", (socket) => {
   weServer.sockets.emit("room_change", publicRooms());
   socket["nickname"] = "Annon";
   socket.onAny((event) => {
     console.log(`Socket Event: ${event}`);
   });
-  const uploader = new siofu();
-  uploader.dir = "./uploads";
-  uploader.listen(socket);
-  uploader.on("saved", (event) => {
-    event.file.clientDetail.nameOfImage = event.file.pathName;
-  });
+
   socket.on("enter_room", (roomName, welcomeRoom) => {
     socket.join(roomName);
     welcomeRoom(countRoom(roomName));
